@@ -9,12 +9,12 @@
 #define MOTOR_WHEEL_D 48
 
 // G3507      TB6612
-// PB24 <--> STBY
-// PA8 <--> AIN1
-// PA9 <--> AIN2
-// PA12 <--> PWMA
+// PB19 <--> AIN2
+// PB17 <--> AIN1
+// PA12 <--> PWMA  (TIMG0_C0)
 // GND <--> GND
 // 3V3 <--> VCC
+// STBY <--> +5V (硬连接)
 
 // TB6612    电源模块
 // VM          7.4V
@@ -24,24 +24,24 @@
 // AO1<--> M+
 // AO2<--> M-
 
-// G3507    直流电机1
-// PA21 <--> A
-// PA22 <--> B
+// G3507    直流电机1编码器
+// PA25 <--> A
+// PA14 <--> B
 // 3V3 <--> VCC
 // GND <--> GND
 
-// 直流电机接线：
+// 直流电机2接线：
 // BO1<--> M+
 // BO2<--> M-
-// PB19 <--> A
-// PB20 <--> B
+// PA26 <--> A
+// PA27 <--> B
 // 3V3 <--> VCC
 // GND <--> GND
 
 // G3507    TB6612
-// PA13 <--> PWMB
-// PA7 <--> BIN2
-// PB18 <--> BIN1
+// PA13 <--> PWMB  (TIMG0_C1)
+// PB24 <--> BIN2
+// PA16 <--> BIN1
 
 // 所有的GND都需要连接在一起
 

@@ -2,15 +2,12 @@
 
 void motor_init(uint8_t motor_id)
 {
-    DL_GPIO_setPins(DC_MOTOR_STBY_PORT, DC_MOTOR_STBY_PIN);
     if(motor_id == 1){
-        // DL_Timer_startCounter(PWMAB_INST);
         DL_GPIO_setPins(DC_MOTOR_AIN1_PORT, DC_MOTOR_AIN1_PIN);
         DL_GPIO_setPins(DC_MOTOR_AIN2_PORT, DC_MOTOR_AIN2_PIN);
         DL_Timer_setCaptureCompareValue(PWMAB_INST, 0, GPIO_PWMAB_C0_IDX);
     }
     else if(motor_id == 2){
-        
         DL_GPIO_setPins(DC_MOTOR_BIN1_PORT, DC_MOTOR_BIN1_PIN);
         DL_GPIO_setPins(DC_MOTOR_BIN2_PORT, DC_MOTOR_BIN2_PIN);
         DL_Timer_setCaptureCompareValue(PWMAB_INST, 0, GPIO_PWMAB_C1_IDX);
@@ -137,15 +134,8 @@ void MOTOR_PID_INST_IRQHandler()
         calculate_speed(2);
         DC_MOTOR_PID(2);
         break;
-    // case DL_TIMER_IIDX_COMPARE_0:
-    //     status = (status + 3 -1) % 3;
-    //     /* code */
-    //     break;
-    
+
     default:
         break;
     }
 }
-
-
-
