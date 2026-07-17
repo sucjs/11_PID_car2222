@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := E:/ti/ccs2050/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS
+CG_TOOL_ROOT := D:/vscode/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS
 
 GEN_OPTS__FLAG := @"./device.opt" 
 GEN_CMDS__FLAG := -Wl,-l"./device_linker.cmd" 
@@ -137,7 +137,7 @@ all: $(OBJS) $(GEN_CMDS)
 # Tool invocations
 11_PID_car.out: $(OBJS) $(GEN_CMDS)
 	@echo 'Arm Linker - building target: "$@"'
-	"E:/ti/ccs2050/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O0 -gdwarf-3 -Wall -Wl,-m"11_PID_car.map" -Wl,-i"C:/TI/mspm0_sdk_2_10_00_04/source" -Wl,-i"C:/Users/37558/workspace_ccstheia/11_PID_car" -Wl,-i"C:/Users/37558/workspace_ccstheia/11_PID_car/Debug/syscfg" -Wl,-i"E:/ti/ccs2050/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="11_PID_car_linkInfo.xml" -Wl,--rom_model -o "11_PID_car.out" $(ORDERED_OBJS)
+	"D:/vscode/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O0 -gdwarf-3 -Wall -Wl,-m"11_PID_car.map" -Wl,-i"C:/TI/mspm0_sdk_2_10_00_04/source" -Wl,-i"E:/zhuomian/PID2222/11_PID_car2222" -Wl,-i"E:/zhuomian/PID2222/11_PID_car2222/Debug/syscfg" -Wl,-i"D:/vscode/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="11_PID_car_linkInfo.xml" -Wl,--rom_model -o "11_PID_car.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 

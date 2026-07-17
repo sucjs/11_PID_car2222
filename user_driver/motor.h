@@ -4,9 +4,9 @@
 #define PI 3.14
 
 // 编码器线数
-#define MOTOR_BIANMAQI 260
+#define MOTOR_BIANMAQI 363
 // 轮胎直径 mm
-#define MOTOR_WHEEL_D 48
+#define MOTOR_WHEEL_D 68
 
 // G3507      TB6612
 // PB19 <--> AIN2

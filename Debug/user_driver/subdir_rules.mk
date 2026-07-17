@@ -7,7 +7,7 @@ SHELL = cmd.exe
 # Each subdirectory must supply rules for building sources it contributes
 user_driver/%.o: ../user_driver/%.c $(GEN_OPTS) | $(GEN_FILES) $(GEN_MISC_FILES)
 	@echo 'Arm Compiler - building file: "$<"'
-	"E:/ti/ccs2050/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" -c @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O0 -I"C:/Users/37558/workspace_ccstheia/11_PID_car/user_driver" -I"C:/Users/37558/workspace_ccstheia/11_PID_car" -I"C:/Users/37558/workspace_ccstheia/11_PID_car/Debug" -I"C:/TI/mspm0_sdk_2_10_00_04/source/third_party/CMSIS/Core/Include" -I"C:/TI/mspm0_sdk_2_10_00_04/source" -gdwarf-3 -Wall -MMD -MP -MF"user_driver/$(basename $(<F)).d_raw" -MT"$(@)"  $(GEN_OPTS__FLAG) -o"$@" "$<"
+	"D:/vscode/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" -c @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O0 -I"E:/zhuomian/PID2222/11_PID_car2222/user_driver" -I"E:/zhuomian/PID2222/11_PID_car2222" -I"E:/zhuomian/PID2222/11_PID_car2222/Debug" -I"C:/TI/mspm0_sdk_2_10_00_04/source/third_party/CMSIS/Core/Include" -I"C:/TI/mspm0_sdk_2_10_00_04/source" -gdwarf-3 -Wall -MMD -MP -MF"user_driver/$(basename $(<F)).d_raw" -MT"$(@)"  $(GEN_OPTS__FLAG) -o"$@" "$<"
 	@echo 'Finished building: "$<"'
 	@echo ' '
 

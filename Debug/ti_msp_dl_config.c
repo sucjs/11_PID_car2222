@@ -57,6 +57,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_OLED_init();
     SYSCFG_DL_DEBUG_init();
     /* Ensure backup structures have no valid state */
+
 	gMOTOR_PIDBackup.backupRdy 	= false;
 
 
@@ -113,7 +114,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
     DL_GPIO_initPeripheralOutputFunction(GPIO_PWMAB_C1_IOMUX,GPIO_PWMAB_C1_IOMUX_FUNC);
     DL_GPIO_enableOutput(GPIO_PWMAB_C1_PORT, GPIO_PWMAB_C1_PIN);
 
-
+    
 	DL_GPIO_initPeripheralInputFunctionFeatures(
 		 GPIO_OLED_IOMUX_SDA, GPIO_OLED_IOMUX_SDA_FUNC,
 		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
@@ -151,7 +152,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
     DL_GPIO_initDigitalInputFeatures(DC_MOTOR_AB_IOMUX,
-		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_NONE,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
     DL_GPIO_initDigitalOutput(DC_MOTOR_BIN2_IOMUX);
@@ -205,11 +206,11 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		LED_LED1_PIN |
 		DC_MOTOR_BIN1_PIN);
     DL_GPIO_setUpperPinsPolarity(GPIOA, DL_GPIO_PIN_25_EDGE_RISE |
-        DL_GPIO_PIN_26_EDGE_RISE);
+		DL_GPIO_PIN_26_EDGE_RISE);
     DL_GPIO_clearInterruptStatus(GPIOA, DC_MOTOR_AA_PIN |
-        DC_MOTOR_BA_PIN);
+		DC_MOTOR_BA_PIN);
     DL_GPIO_enableInterrupt(GPIOA, DC_MOTOR_AA_PIN |
-        DC_MOTOR_BA_PIN);
+		DC_MOTOR_BA_PIN);
     DL_GPIO_clearPins(GPIOB, DC_MOTOR_AIN2_PIN |
 		DC_MOTOR_AIN1_PIN |
 		DC_MOTOR_BIN2_PIN);
@@ -306,7 +307,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
     DL_SYSCTL_setBORThreshold(DL_SYSCTL_BOR_THRESHOLD_LEVEL_0);
     DL_SYSCTL_setFlashWaitState(DL_SYSCTL_FLASH_WAIT_STATE_2);
 
-
+    
 	DL_SYSCTL_setSYSOSCFreq(DL_SYSCTL_SYSOSC_FREQ_BASE);
 	/* Set default configuration */
 	DL_SYSCTL_disableHFXT();
@@ -383,7 +384,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_PWMAB_init(void) {
     DL_TimerG_enableClock(PWMAB_INST);
 
 
-
+    
     DL_TimerG_setCCPDirection(PWMAB_INST , DL_TIMER_CC0_OUTPUT | DL_TIMER_CC1_OUTPUT );
 
 
@@ -494,3 +495,4 @@ SYSCONFIG_WEAK void SYSCFG_DL_DEBUG_init(void)
 
     DL_UART_Main_enable(DEBUG_INST);
 }
+

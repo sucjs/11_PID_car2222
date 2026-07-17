@@ -51,8 +51,8 @@ int main(void)
     OLED_ColorTurn(0);//0正常显示，1 反色显示
     OLED_DisplayTurn(0);//0正常显示 1 屏幕翻转显示
     OLED_Clear();
-    NVIC_EnableIRQ(KEY_GPIOB_INT_IRQN);
-    NVIC_EnableIRQ(DC_MOTOR_GPIOA_INT_IRQN);
+    NVIC_EnableIRQ(KEY_INT_IRQN);
+    NVIC_EnableIRQ(DC_MOTOR_INT_IRQN);
     motor_init(1);
     target_speed_1 = 0;
     target_speed_2 = 0;
