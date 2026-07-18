@@ -67,7 +67,7 @@ int main(void)
     motor_set_direction(2, 1);  // 电机2 正转
 
     // ====== 步骤3: 设置初始目标速度 ======
-    target_speed_1 = 100;    // 初始直行速度 mm/s（与 huidu.c 中 BASE_SPEED 一致）
+    target_speed_1 = 100;    // 初始直行速度 mm/s（与 huidu.c 中 spd[2] 一致）
     target_speed_2 = 100;
 
     // ====== 步骤4: 最后启动 PID 定时器（两个电机就绪后才开始控制） ======

@@ -118,8 +118,8 @@ void calculate_speed(uint8_t motor_id)
 
 // ==================== 位置式 PI 控制器 ====================
 
-float kp = 1.5f;
-float ki = 0.4f;
+float kp = 1.0f;
+float ki = 0.3f;
 
 int32_t PWM_1_duty = 0;
 float target_speed_1 = 0;
