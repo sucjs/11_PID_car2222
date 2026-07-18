@@ -23,77 +23,135 @@ void huidu_get_value()
 extern float target_speed_1;
 extern float target_speed_2;
 
-// 五档速度 (mm/s)，比原来降低一半，避免疯转
-// 索引:       [0]   [1]   [2]   [3]   [4]
-float spd[] = { 60,   80,  100,  180,  220};
+// 七档速度：更细粒度，平滑过渡
+// 索引:       [0]   [1]   [2]   [3]   [4]   [5]   [6]
+float spd[] = { 50,   65,   80,  100,  140,  180,  220};
 
 void adjust_motor()
 {
     huidu_get_value();
 
-    // ---- 8路全黑：完全没有线 → 直行慢速找线 ----
+    // =====================================================
+    // 边界情况
+    // =====================================================
+
+    // 8路全黑：完全没有线 → 直行慢速找线
     if (huidu_value[0] == 0 && huidu_value[1] == 0 && huidu_value[2] == 0 && huidu_value[3] == 0 &&
         huidu_value[4] == 0 && huidu_value[5] == 0 && huidu_value[6] == 0 && huidu_value[7] == 0)
     {
-        target_speed_1 = spd[1];  // 80
+        target_speed_1 = spd[1];  // 65
         target_speed_2 = spd[1];
     }
-    // ---- 8路全白：全部检测到线 → 停车 ----
+    // 8路全白：全部检测到线 → 停车
     else if (huidu_value[0] == 1 && huidu_value[1] == 1 && huidu_value[2] == 1 && huidu_value[3] == 1 &&
              huidu_value[4] == 1 && huidu_value[5] == 1 && huidu_value[6] == 1 && huidu_value[7] == 1)
     {
         target_speed_1 = 0;
         target_speed_2 = 0;
     }
-    // ---- 直行：只有中间 S3,S4 踩线 ----
+
+    // =====================================================
+    // 直行状态
+    // =====================================================
+
+    // 直行：S3,S4 踩线（2传感器，线宽适中）
     else if (huidu_value[2] == 0 && huidu_value[3] == 1 && huidu_value[4] == 1 && huidu_value[5] == 0)
     {
-        target_speed_1 = spd[2];  // 100
-        target_speed_2 = spd[2];
+        target_speed_1 = spd[3];  // 100
+        target_speed_2 = spd[3];
     }
-    // ---- 线偏左：S1,S2 踩线 → 左轮慢、右轮快 ----
-    else if (huidu_value[1] == 1 && huidu_value[2] == 1 &&
-             huidu_value[3] == 0 && huidu_value[4] == 0)
+    // 直行：仅 S3 踩线（线很窄，偏左一点）
+    else if (huidu_value[2] == 0 && huidu_value[3] == 1 && huidu_value[4] == 0)
     {
-        target_speed_1 = spd[2];  // 左轮 100（慢）
-        target_speed_2 = spd[3];  // 右轮 180（快）
+        target_speed_1 = spd[3];  // 100
+        target_speed_2 = spd[3];
     }
-    // ---- 线更偏左：S0,S1 踩线 ----
+    // 直行：仅 S4 踩线（线很窄，偏右一点）
+    else if (huidu_value[3] == 0 && huidu_value[4] == 1 && huidu_value[5] == 0)
+    {
+        target_speed_1 = spd[3];  // 100
+        target_speed_2 = spd[3];
+    }
+    // 宽线偏左：S2,S3,S4 同时踩线 → 微左转
+    else if (huidu_value[1] == 0 && huidu_value[2] == 1 && huidu_value[3] == 1 && huidu_value[4] == 1 && huidu_value[5] == 0)
+    {
+        target_speed_1 = spd[3];  // 左轮 100
+        target_speed_2 = spd[4];  // 右轮 140
+    }
+    // 宽线偏右：S3,S4,S5 同时踩线 → 微右转
+    else if (huidu_value[2] == 0 && huidu_value[3] == 1 && huidu_value[4] == 1 && huidu_value[5] == 1 && huidu_value[6] == 0)
+    {
+        target_speed_1 = spd[4];  // 左轮 140
+        target_speed_2 = spd[3];  // 右轮 100
+    }
+
+    // =====================================================
+    // 左转状态（线在左边 → 左轮慢、右轮快）
+    // =====================================================
+
+    // 微微偏左：S2,S3 踩线
+    else if (huidu_value[1] == 0 && huidu_value[2] == 1 && huidu_value[3] == 1 && huidu_value[4] == 0)
+    {
+        target_speed_1 = spd[3];  // 左轮 100
+        target_speed_2 = spd[4];  // 右轮 140
+    }
+    // 偏左：S1,S2 踩线
+    else if (huidu_value[0] == 0 && huidu_value[1] == 1 && huidu_value[2] == 1 && huidu_value[3] == 0)
+    {
+        target_speed_1 = spd[2];  // 左轮 80
+        target_speed_2 = spd[5];  // 右轮 180
+    }
+    // 更偏左：S0,S1 踩线
     else if (huidu_value[0] == 1 && huidu_value[1] == 1 &&
              huidu_value[2] == 0 && huidu_value[3] == 0)
     {
-        target_speed_1 = spd[1];  // 左轮 80（更慢）
-        target_speed_2 = spd[3];  // 右轮 180（快）
+        target_speed_1 = spd[1];  // 左轮 65
+        target_speed_2 = spd[6];  // 右轮 220
     }
-    // ---- 线在最左边：只有 S0 踩线 ----
+    // 最左边：只有 S0 踩线
     else if (huidu_value[0] == 1 && huidu_value[1] == 0 &&
              huidu_value[2] == 0 && huidu_value[3] == 0 && huidu_value[4] == 0)
     {
-        target_speed_1 = spd[0];  // 左轮 60（最慢）
-        target_speed_2 = spd[3];  // 右轮 180（快）
+        target_speed_1 = spd[0];  // 左轮 50
+        target_speed_2 = spd[6];  // 右轮 220
     }
-    // ---- 线偏右：S5,S6 踩线 → 右轮慢、左轮快 ----
+
+    // =====================================================
+    // 右转状态（线在右边 → 右轮慢、左轮快）
+    // =====================================================
+
+    // 微微偏右：S4,S5 踩线
+    else if (huidu_value[3] == 0 && huidu_value[4] == 1 && huidu_value[5] == 1 && huidu_value[6] == 0)
+    {
+        target_speed_1 = spd[4];  // 左轮 140
+        target_speed_2 = spd[3];  // 右轮 100
+    }
+    // 偏右：S5,S6 踩线
     else if (huidu_value[4] == 0 && huidu_value[5] == 1 && huidu_value[6] == 1 && huidu_value[7] == 0)
     {
-        target_speed_1 = spd[3];  // 左轮 180（快）
-        target_speed_2 = spd[2];  // 右轮 100（慢）
+        target_speed_1 = spd[5];  // 左轮 180
+        target_speed_2 = spd[2];  // 右轮 80
     }
-    // ---- 线更偏右：S6,S7 踩线 ----
-    else if (huidu_value[5] == 0 && huidu_value[6] == 1 && huidu_value[7] == 1)
+    // 更偏右：S6,S7 踩线
+    else if (huidu_value[4] == 0 && huidu_value[5] == 0 &&
+             huidu_value[6] == 1 && huidu_value[7] == 1)
     {
-        target_speed_1 = spd[3];  // 左轮 180（快）
-        target_speed_2 = spd[1];  // 右轮 80（更慢）
+        target_speed_1 = spd[6];  // 左轮 220
+        target_speed_2 = spd[1];  // 右轮 65
     }
-    // ---- 线在最右边：只有 S7 踩线 ----
+    // 最右边：只有 S7 踩线
     else if (huidu_value[4] == 0 && huidu_value[5] == 0 &&
              huidu_value[6] == 0 && huidu_value[7] == 1)
     {
-        target_speed_1 = spd[3];  // 左轮 180（快）
-        target_speed_2 = spd[0];  // 右轮 60（最慢）
+        target_speed_1 = spd[6];  // 左轮 220
+        target_speed_2 = spd[0];  // 右轮 50
     }
-    // ---- 兜底：未匹配的传感器状态 → 保持直行，不改变目标速度 ----
+
+    // =====================================================
+    // 兜底：未匹配 → 保持上一周期速度不变
+    // =====================================================
     else
     {
-        // 什么都不做，让 PID 继续用上一周期的速度
+        // 不改变 target_speed_1/2
     }
 }

@@ -68,14 +68,14 @@ void motor_set_direction(uint8_t motor_id, uint8_t direction)
             DL_GPIO_clearPins(DC_MOTOR_AIN2_PORT, DC_MOTOR_AIN2_PIN);
         }
         else if (direction == 1) {
-            // 正转：IN1=HIGH, IN2=LOW
-            DL_GPIO_setPins(DC_MOTOR_AIN1_PORT, DC_MOTOR_AIN1_PIN);
-            DL_GPIO_clearPins(DC_MOTOR_AIN2_PORT, DC_MOTOR_AIN2_PIN);
-        }
-        else if (direction == 2) {
-            // 反转：IN1=LOW, IN2=HIGH
+            // 正转（修复转向）：IN1=LOW, IN2=HIGH
             DL_GPIO_clearPins(DC_MOTOR_AIN1_PORT, DC_MOTOR_AIN1_PIN);
             DL_GPIO_setPins(DC_MOTOR_AIN2_PORT, DC_MOTOR_AIN2_PIN);
+        }
+        else if (direction == 2) {
+            // 反转（修复转向）：IN1=HIGH, IN2=LOW
+            DL_GPIO_setPins(DC_MOTOR_AIN1_PORT, DC_MOTOR_AIN1_PIN);
+            DL_GPIO_clearPins(DC_MOTOR_AIN2_PORT, DC_MOTOR_AIN2_PIN);
         }
     }
     else if (motor_id == 2) {
@@ -84,14 +84,14 @@ void motor_set_direction(uint8_t motor_id, uint8_t direction)
             DL_GPIO_clearPins(DC_MOTOR_BIN2_PORT, DC_MOTOR_BIN2_PIN);
         }
         else if (direction == 1) {
-            // 正转：IN1=HIGH, IN2=LOW
-            DL_GPIO_setPins(DC_MOTOR_BIN1_PORT, DC_MOTOR_BIN1_PIN);
-            DL_GPIO_clearPins(DC_MOTOR_BIN2_PORT, DC_MOTOR_BIN2_PIN);
-        }
-        else if (direction == 2) {
-            // 反转：IN1=LOW, IN2=HIGH
+            // 正转（修复转向）：IN1=LOW, IN2=HIGH
             DL_GPIO_clearPins(DC_MOTOR_BIN1_PORT, DC_MOTOR_BIN1_PIN);
             DL_GPIO_setPins(DC_MOTOR_BIN2_PORT, DC_MOTOR_BIN2_PIN);
+        }
+        else if (direction == 2) {
+            // 反转（修复转向）：IN1=HIGH, IN2=LOW
+            DL_GPIO_setPins(DC_MOTOR_BIN1_PORT, DC_MOTOR_BIN1_PIN);
+            DL_GPIO_clearPins(DC_MOTOR_BIN2_PORT, DC_MOTOR_BIN2_PIN);
         }
     }
 }
