@@ -1,5 +1,14 @@
 #include "huidu.h"
 
+// ==================== 循迹参数（可根据实际赛道调整） ====================
+
+#define BASE_SPEED   100.0f   // 直行基准速度 mm/s（慢速，稳）
+#define TURN_GAIN     22.0f   // 转向增益（越大转弯越猛）
+#define MIN_SPEED      35.0f   // 最低轮速 mm/s（不能为0，否则单边停转）
+#define MAX_SPEED     180.0f   // 最高轮速 mm/s
+
+// ==================== 传感器读取 ====================
+
 uint8_t huidu_value[] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 uint8_t get_gpio_state(GPIO_Regs *gpio_port, uint32_t gpio) {
@@ -20,99 +29,68 @@ void huidu_get_value()
     huidu_value[7] = get_gpio_state(HUIDU_S7_PORT, HUIDU_S7_PIN);
 }
 
+// ==================== 质心法循迹控制 ====================
+//
+// 传感器布局（俯视）：
+//   S0   S1   S2   S3   S4   S5   S6   S7
+//   左 ←――――――――――― 中心 ―――――――――――――→ 右
+//   权重 0    1    2    3    4    5    6    7
+//
+// 线位置（质心）= Σ(i × Si) / Σ(Si)，范围 0.0~7.0，中心 = 3.5
+// 偏差 > 0 → 线偏左 → 左转（左轮慢、右轮快）
+// 偏差 < 0 → 线偏右 → 右转（右轮慢、左轮快）
+
 extern float target_speed_1;
 extern float target_speed_2;
 
-// 五档速度 (mm/s)：最慢弯 → 小弯 → 直行 → 快弯外轮 → 最快弯外轮
-// 索引:   [0]     [1]    [2]    [3]      [4]
-float target_speed_5[] = {125, 175, 200, 400, 500};
-
 void adjust_motor()
 {
+    uint8_t i;
+
     huidu_get_value();
 
-    // ---- 全部在白线上（8路全白）→ 到达终点/十字路口，停车 ----
-    if (huidu_value[0] == 1 && huidu_value[1] == 1 && huidu_value[2] == 1 && huidu_value[3] == 1 &&
-        huidu_value[4] == 1 && huidu_value[5] == 1 && huidu_value[6] == 1 && huidu_value[7] == 1)
-    {
+    // ---- 统计有多少传感器检测到线（值=1表示踩线） ----
+    uint8_t sum = 0;
+    for (i = 0; i < 8; i++) {
+        sum += huidu_value[i];
+    }
+
+    // ---- 8路全白 = 到达宽线/路口/终点 → 停车 ----
+    if (sum == 8) {
         target_speed_1 = 0;
         target_speed_2 = 0;
         return;
     }
 
-    // ---- 完全离开线（8路全黑）→ 保持直行，不改变方向 ----
-    if (huidu_value[0] == 0 && huidu_value[1] == 0 && huidu_value[2] == 0 && huidu_value[3] == 0 &&
-        huidu_value[4] == 0 && huidu_value[5] == 0 && huidu_value[6] == 0 && huidu_value[7] == 0)
-    {
-        target_speed_1 = target_speed_5[2];    // 200 mm/s 基准直行
-        target_speed_2 = target_speed_5[2];
+    // ---- 8路全黑 = 完全丢线 → 保持直行，慢速前进直到重新找到线 ----
+    if (sum == 0) {
+        target_speed_1 = BASE_SPEED * 0.6f;  // 60 mm/s 慢速找线
+        target_speed_2 = BASE_SPEED * 0.6f;
         return;
     }
 
-    // ---- 只有中间两个传感器 (S3,S4) 检测到线 → 直行 ----
-    if (huidu_value[3] == 1 && huidu_value[4] == 1 &&
-        huidu_value[2] == 0 && huidu_value[5] == 0)
-    {
-        target_speed_1 = target_speed_5[2];    // 200 mm/s 基准直行
-        target_speed_2 = target_speed_5[2];
-        return;
+    // ---- 正常情况：计算质心位置 ----
+    // 加权求和：每个传感器位置 × 是否踩线（0或1）
+    uint16_t weighted_sum = 0;
+    for (i = 0; i < 8; i++) {
+        weighted_sum += i * huidu_value[i];
     }
+    float position = (float)weighted_sum / sum;  // 0.0(最左) ~ 7.0(最右)
 
-    // ---- 线偏左：S2,S3 检测到线 → 左轮减速，右轮加速 → 左转 ----
-    if (huidu_value[2] == 1 && huidu_value[3] == 1 &&
-        huidu_value[1] == 0 && huidu_value[4] == 0)
-    {
-        target_speed_1 = target_speed_5[2];    // 左轮 200（慢）
-        target_speed_2 = target_speed_5[3];    // 右轮 400（快）→ 左转
-        return;
-    }
+    // 偏差 = 中心位置(3.5) - 实际位置
+    // 正值 → 线在左边 → 需要左转
+    // 负值 → 线在右边 → 需要右转
+    float error = 3.5f - position;
 
-    // ---- 线更偏左：S1,S2 检测到线 → 更大左转 ----
-    if (huidu_value[1] == 1 && huidu_value[2] == 1 &&
-        huidu_value[0] == 0 && huidu_value[3] == 0)
-    {
-        target_speed_1 = target_speed_5[1];    // 左轮 175（更慢）
-        target_speed_2 = target_speed_5[3];    // 右轮 400（快）→ 急左转
-        return;
-    }
+    // ---- 差速转向：左轮和右轮按偏差反向调节 ----
+    // 线偏左(error>0)：左轮减速、右轮加速 → 小车左转追线
+    // 线偏右(error<0)：左轮加速、右轮减速 → 小车右转追线
+    target_speed_1 = BASE_SPEED - error * TURN_GAIN;  // 左轮
+    target_speed_2 = BASE_SPEED + error * TURN_GAIN;  // 右轮
 
-    // ---- 线在最左边：只有 S0 检测到线 → 最大左转 ----
-    if (huidu_value[0] == 1 &&
-        huidu_value[1] == 0 && huidu_value[2] == 0 &&
-        huidu_value[3] == 0)
-    {
-        target_speed_1 = target_speed_5[0];    // 左轮 125（最慢）
-        target_speed_2 = target_speed_5[3];    // 右轮 400（快）→ 最大左转
-        return;
-    }
-
-    // ---- 线偏右：S4,S5 检测到线 → 右轮减速，左轮加速 → 右转 ----
-    if (huidu_value[4] == 1 && huidu_value[5] == 1 &&
-        huidu_value[3] == 0 && huidu_value[6] == 0)
-    {
-        target_speed_1 = target_speed_5[3];    // 左轮 400（快）
-        target_speed_2 = target_speed_5[2];    // 右轮 200（慢）→ 右转
-        return;
-    }
-
-    // ---- 线更偏右：S5,S6 检测到线 → 更大右转 ----
-    if (huidu_value[5] == 1 && huidu_value[6] == 1 &&
-        huidu_value[4] == 0 && huidu_value[7] == 0)
-    {
-        target_speed_1 = target_speed_5[3];    // 左轮 400（快）
-        target_speed_2 = target_speed_5[1];    // 右轮 175（更慢）→ 急右转
-        return;
-    }
-
-    // ---- 线在最右边：只有 S7 检测到线 → 最大右转 ----
-    if (huidu_value[7] == 1 &&
-        huidu_value[4] == 0 && huidu_value[5] == 0 && huidu_value[6] == 0)
-    {
-        target_speed_1 = target_speed_5[3];    // 左轮 400（快）
-        target_speed_2 = target_speed_5[0];    // 右轮 125（最慢）→ 最大右转
-        return;
-    }
-
-    // ---- 兜底：其他未匹配的传感器组合 → 保持当前目标速度不变 ----
-    // （不修改 target_speed_1/2，沿用上一周期的值，避免误判导致停车）
+    // ---- 限幅：防止速度为0或过大 ----
+    if (target_speed_1 > MAX_SPEED) target_speed_1 = MAX_SPEED;
+    if (target_speed_1 < MIN_SPEED) target_speed_1 = MIN_SPEED;
+    if (target_speed_2 > MAX_SPEED) target_speed_2 = MAX_SPEED;
+    if (target_speed_2 < MIN_SPEED) target_speed_2 = MIN_SPEED;
 }

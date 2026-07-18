@@ -59,8 +59,8 @@ int main(void)
     motor_init(2);
 
     // ====== 步骤2: 两个电机都就绪后，设置初始目标速度 ======
-    target_speed_1 = 200;    // 初始直行速度 mm/s
-    target_speed_2 = 200;
+    target_speed_1 = 100;    // 初始直行速度 mm/s（慢速，与 huidu.c 中 BASE_SPEED 一致）
+    target_speed_2 = 100;
 
     // ====== 步骤3: 最后启动 PID 定时器（避免中断在初始化期间触发） ======
     motor_pid_start();

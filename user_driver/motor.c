@@ -126,8 +126,8 @@ void calculate_speed(uint8_t motor_id)
 // 公式: duty = kp * error + ki * ∫error
 // 抗积分饱和：积分项被限幅在 ±4000 内
 
-float kp = 0.8;    // 比例系数（比之前略大，快速响应）
-float ki = 0.3;    // 积分系数（比之前略小，避免振荡）
+float kp = 1.5;    // 比例系数（低速需较大值以克服静摩擦力）
+float ki = 0.4;    // 积分系数（消除稳态误差，低速时适当增大）
 
 int32_t PWM_1_duty = 0;
 float target_speed_1 = 0;    // 目标速度 mm/s（main.c 中赋初值）
