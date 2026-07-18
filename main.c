@@ -48,20 +48,29 @@ int main(void)
 {
     SYSCFG_DL_init();
     OLED_Init();
-    OLED_ColorTurn(0);//0正常显示，1 反色显示
-    OLED_DisplayTurn(0);//0正常显示 1 屏幕翻转显示
+    OLED_ColorTurn(0);      // 0 正常显示，1 反色显示
+    OLED_DisplayTurn(0);     // 0 正常显示，1 屏幕翻转显示
     OLED_Clear();
     NVIC_EnableIRQ(KEY_INT_IRQN);
     NVIC_EnableIRQ(DC_MOTOR_INT_IRQN);
-    motor_init(1);           // 初始化电机1（含方向设置）
-    motor_init(2);           // 初始化电机2（含方向设置）
-    target_speed_1 = 200;    // 初始直行目标速度 mm/s（不再从0开始）
+
+    // ====== 步骤1: 先初始化两个电机（方向设为正转，PWM 置零） ======
+    motor_init(1);
+    motor_init(2);
+
+    // ====== 步骤2: 两个电机都就绪后，设置初始目标速度 ======
+    target_speed_1 = 200;    // 初始直行速度 mm/s
     target_speed_2 = 200;
+
+    // ====== 步骤3: 最后启动 PID 定时器（避免中断在初始化期间触发） ======
+    motor_pid_start();
 
     char huidu_buf[] = "00000000\n";
     while (1) {
         huidu_get_value();
-        sprintf(huidu_buf, "%d%d%d%d%d%d%d%d\n", huidu_value[0], huidu_value[1], huidu_value[2], huidu_value[3], huidu_value[4], huidu_value[5], huidu_value[6], huidu_value[7]);
+        sprintf(huidu_buf, "%d%d%d%d%d%d%d%d\n",
+                huidu_value[0], huidu_value[1], huidu_value[2], huidu_value[3],
+                huidu_value[4], huidu_value[5], huidu_value[6], huidu_value[7]);
         UART_send_string(DEBUG_INST, huidu_buf);
         delay_ms(500);
     }
