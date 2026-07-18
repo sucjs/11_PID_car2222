@@ -53,9 +53,10 @@ int main(void)
     OLED_Clear();
     NVIC_EnableIRQ(KEY_INT_IRQN);
     NVIC_EnableIRQ(DC_MOTOR_INT_IRQN);
-    motor_init(1);
-    target_speed_1 = 0;
-    target_speed_2 = 0;
+    motor_init(1);           // 初始化电机1（含方向设置）
+    motor_init(2);           // 初始化电机2（含方向设置）
+    target_speed_1 = 200;    // 初始直行目标速度 mm/s（不再从0开始）
+    target_speed_2 = 200;
 
     char huidu_buf[] = "00000000\n";
     while (1) {
@@ -63,7 +64,5 @@ int main(void)
         sprintf(huidu_buf, "%d%d%d%d%d%d%d%d\n", huidu_value[0], huidu_value[1], huidu_value[2], huidu_value[3], huidu_value[4], huidu_value[5], huidu_value[6], huidu_value[7]);
         UART_send_string(DEBUG_INST, huidu_buf);
         delay_ms(500);
-        motor_set_direction(1, 1);
-        motor_set_direction(2, 1);
     }
 }
