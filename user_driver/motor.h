@@ -49,7 +49,6 @@
 #include "huidu.h"
 
 void motor_init(uint8_t motor_id);
-void motor_pid_start(void);      // 初始化完所有电机后，调用一次启动PID定时器
 void motor_set_duty(uint8_t motor_id, uint32_t duty);
 void motor_set_direction(uint8_t motor_id, uint8_t direction);
 
