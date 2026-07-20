@@ -20,29 +20,29 @@
 
 // 小车运行模式
 typedef enum {
-    MODE_STOP       = 0,  // 停车
-    MODE_RUN        = 1,  // 循迹运行
-    MODE_TUNE_KP    = 2,  // 调节 KP
-    MODE_TUNE_KD    = 3,  // 调节 KD
-    MODE_TUNE_KI    = 4,  // 调节 KI
-    MODE_TUNE_SPEED = 5,  // 调节基础速度
+    MODE_STOP       = 0,
+    MODE_RUN        = 1,
+    MODE_TUNE_KP    = 2,
+    MODE_TUNE_KD    = 3,
+    MODE_TUNE_KI    = 4,
+    MODE_TUNE_SPEED = 5,
     MODE_COUNT      = 6
 } car_mode_t;
 
-// PID 循迹参数（可通过按键或串口在线调节）
-extern float line_kp;       // 位置比例系数
-extern float line_kd;       // 位置微分系数
-extern float line_ki;       // 位置积分系数
-extern float base_speed;    // 基础速度 (mm/s)
+// PID 循迹参数
+extern float line_kp;
+extern float line_kd;
+extern float line_ki;
+extern float base_speed;
 
 // 调试/观测变量
-extern float line_position; // 当前线位置 (0~7000, 中心=3500)
-extern float line_error;    // 当前偏差
-extern float line_turn;     // PID 输出的转向修正量
+extern float line_position;
+extern float line_error;
+extern float line_turn;
+extern uint8_t huidu_value[];
 
 void huidu_get_value(void);
 void adjust_motor(void);
-void line_pid_reset(void);           // 重置积分和历史误差
-void line_pid_tune_param(int dir);   // 按键调参: dir>0增加, dir<0减少
+void line_pid_reset(void);
 
 #endif

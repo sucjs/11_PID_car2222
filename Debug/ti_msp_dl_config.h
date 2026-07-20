@@ -163,20 +163,32 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 /* Defines for LED1: GPIOA.8 with pinCMx 19 on package pin 54 */
 #define LED_LED1_PIN                                             (DL_GPIO_PIN_8)
 #define LED_LED1_IOMUX                                           (IOMUX_PINCM19)
-/* Port definition for Pin Group KEY */
+/* Port definition for Pin Group KEY (5-button menu) */
 #define KEY_PORT                                                         (GPIOB)
 
-/* Defines for KEY0: GPIOB.8 with pinCMx 25 on package pin 60 */
-// pins affected by this interrupt request:["KEY0","KEY1"]
+// pins affected by this interrupt request:["KEY_UP","KEY_DOWN","KEY_OK","KEY_BACK","KEY_RUN"]
 #define KEY_INT_IRQN                                            (GPIOB_INT_IRQn)
 #define KEY_INT_IIDX                            (DL_INTERRUPT_GROUP1_IIDX_GPIOB)
-#define KEY_KEY0_IIDX                                        (DL_GPIO_IIDX_DIO8)
-#define KEY_KEY0_PIN                                             (DL_GPIO_PIN_8)
-#define KEY_KEY0_IOMUX                                           (IOMUX_PINCM25)
-/* Defines for KEY1: GPIOB.9 with pinCMx 26 on package pin 61 */
-#define KEY_KEY1_IIDX                                        (DL_GPIO_IIDX_DIO9)
-#define KEY_KEY1_PIN                                             (DL_GPIO_PIN_9)
-#define KEY_KEY1_IOMUX                                           (IOMUX_PINCM26)
+/* KEY_UP:   GPIOB.0  with pinCMx 13 on package pin 48 */
+#define KEY_KEY_UP_IIDX                                      (DL_GPIO_IIDX_DIO0)
+#define KEY_KEY_UP_PIN                                           (DL_GPIO_PIN_0)
+#define KEY_KEY_UP_IOMUX                                         (IOMUX_PINCM13)
+/* KEY_DOWN: GPIOB.1  with pinCMx 14 on package pin 49 */
+#define KEY_KEY_DOWN_IIDX                                    (DL_GPIO_IIDX_DIO1)
+#define KEY_KEY_DOWN_PIN                                         (DL_GPIO_PIN_1)
+#define KEY_KEY_DOWN_IOMUX                                       (IOMUX_PINCM14)
+/* KEY_OK:   GPIOB.10 with pinCMx 27 on package pin 62 */
+#define KEY_KEY_OK_IIDX                                     (DL_GPIO_IIDX_DIO10)
+#define KEY_KEY_OK_PIN                                          (DL_GPIO_PIN_10)
+#define KEY_KEY_OK_IOMUX                                        (IOMUX_PINCM27)
+/* KEY_BACK: GPIOB.11 with pinCMx 28 on package pin 63 */
+#define KEY_KEY_BACK_IIDX                                   (DL_GPIO_IIDX_DIO11)
+#define KEY_KEY_BACK_PIN                                        (DL_GPIO_PIN_11)
+#define KEY_KEY_BACK_IOMUX                                      (IOMUX_PINCM28)
+/* KEY_RUN:  GPIOB.14 with pinCMx 31 on package pin 2 */
+#define KEY_KEY_RUN_IIDX                                    (DL_GPIO_IIDX_DIO14)
+#define KEY_KEY_RUN_PIN                                         (DL_GPIO_PIN_14)
+#define KEY_KEY_RUN_IOMUX                                       (IOMUX_PINCM31)
 /* Defines for AIN2: GPIOB.19 with pinCMx 45 on package pin 16 */
 #define DC_MOTOR_AIN2_PORT                                               (GPIOB)
 #define DC_MOTOR_AIN2_PIN                                       (DL_GPIO_PIN_19)

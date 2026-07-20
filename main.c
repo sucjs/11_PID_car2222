@@ -1,14 +1,17 @@
 /*
- * 8路灰度PID循迹小车 — 主程序
+ * 8路灰度PID循迹小车 — 主程序 (5按键菜单版)
  * MCU: MSPM0G3507  主频: 80MHz
  * 
  * 控制架构（级联PID）：
  *   外环(10ms): 灰度位置PID -> 计算左右轮目标速度
  *   内环(10ms): 编码器速度PI  -> 计算PWM占空比
  * 
- * 按键操作：
- *   KEY0: 模式切换  STOP->RUN->TUNE_KP->TUNE_KD->TUNE_KI->TUNE_SPEED
- *   KEY1: TUNE模式=增大参数 / 非TUNE模式=切回上一个模式
+ * 5按键操作：
+ *   PB14(RUN):  快捷启动/停止（任意状态下可用）
+ *   PB10(OK):   进入菜单 / 确认选择
+ *   PB11(BACK): 返回 / 取消
+ *   PB0(UP):    上 / 增大
+ *   PB1(DOWN):  下 / 减小
  */
 
 #include "ti_msp_dl_config.h"
@@ -36,20 +39,20 @@ extern float line_kp, line_kd, line_ki, base_speed;
 extern float line_position, line_error, line_turn;
 
 // -----------------------------------------------------------
-// OLED 辅助显示函数
+// OLED 显示：8路传感器方块
 // -----------------------------------------------------------
 void OLED_show_sensors(void)
 {
     uint8_t i;
     for (i = 0; i < 8; i++) {
-        uint8_t x = i * 16;       // 每格16像素
-        uint8_t y = 14;           // 第2行
-        if (!huidu_value[i]) {    // 踩黑线=实心方块
+        uint8_t x = i * 16;
+        uint8_t y = 14;
+        if (!huidu_value[i]) {
             uint8_t r, c;
             for (r = 0; r < 10; r++)
                 for (c = 0; c < 14; c++)
                     OLED_DrawPoint(x + c, y + r);
-        } else {                  // 白底=空心框
+        } else {
             uint8_t j;
             for (j = 0; j < 14; j++) {
                 OLED_DrawPoint(x + j, y);
@@ -63,34 +66,118 @@ void OLED_show_sensors(void)
     }
 }
 
+// -----------------------------------------------------------
+// OLED 仪表盘 (MENU_OFF)
+// -----------------------------------------------------------
 void OLED_show_dashboard(void)
 {
     char buf[20];
 
     OLED_Clear();
 
-    // 第1行：模式
-    switch (mode) {
-        case MODE_STOP:       OLED_ShowString(0, 0, (uint8_t *)"STOP", 12); break;
-        case MODE_RUN:        OLED_ShowString(0, 0, (uint8_t *)"RUN ", 12); break;
-        case MODE_TUNE_KP:    OLED_ShowString(0, 0, (uint8_t *)"T-KP", 12); break;
-        case MODE_TUNE_KD:    OLED_ShowString(0, 0, (uint8_t *)"T-KD", 12); break;
-        case MODE_TUNE_KI:    OLED_ShowString(0, 0, (uint8_t *)"T-KI", 12); break;
-        case MODE_TUNE_SPEED: OLED_ShowString(0, 0, (uint8_t *)"T-SP", 12); break;
-    }
+    if (mode == MODE_STOP)
+        OLED_ShowString(0, 0, (uint8_t *)"STOP", 12);
+    else if (mode == MODE_RUN)
+        OLED_ShowString(0, 0, (uint8_t *)"RUN ", 12);
+    else
+        OLED_ShowString(0, 0, (uint8_t *)"TUNE", 12);
 
-    // 传感器可视化
+    sprintf(buf, "Spd:%d", (int)base_speed);
+    OLED_ShowString(60, 0, (uint8_t *)buf, 12);
+
     OLED_show_sensors();
 
-    // 数据行
     sprintf(buf, "P:%4d E:%4d", (int)line_position, (int)line_error);
     OLED_ShowString(0, 26, (uint8_t *)buf, 12);
 
-    sprintf(buf, "L:%3d R:%3d", (int)speed_1, (int)speed_2);
+    sprintf(buf, "L:%3d R:%3d T:%d", (int)speed_1, (int)speed_2, (int)line_turn);
     OLED_ShowString(0, 38, (uint8_t *)buf, 12);
 
-    sprintf(buf, "Kp:%.2f Kd:%.2f", (double)line_kp, (double)line_kd);
+    sprintf(buf, "Kp%.2f Kd%.2f Ki%.3f",
+            (double)line_kp, (double)line_kd, (double)line_ki);
     OLED_ShowString(0, 50, (uint8_t *)buf, 12);
+
+    OLED_Refresh();
+}
+
+// -----------------------------------------------------------
+// OLED 主菜单 (MENU_MAIN)
+// -----------------------------------------------------------
+void OLED_show_menu(void)
+{
+    char buf[24];
+    uint8_t y, i;
+    const char *items[] = {"Run/Stop", "Base Speed", "KP", "KD", "KI", "Exit Menu"};
+
+    OLED_Clear();
+    OLED_ShowString(0, 0, (uint8_t *)"-- MENU --", 12);
+
+    for (i = 0; i < MENU_ITEM_COUNT; i++) {
+        y = 12 + i * 9;
+        if (i == menu_cursor)
+            OLED_ShowString(0, y, (uint8_t *)">", 12);
+        else
+            OLED_ShowString(0, y, (uint8_t *)" ", 12);
+
+        switch (i) {
+            case MENU_ITEM_RUN:
+                sprintf(buf, "%s [%s]", items[i],
+                        (mode == MODE_STOP) ? "STOP" : "RUN");
+                break;
+            case MENU_ITEM_SPEED:
+                sprintf(buf, "%s: %d", items[i], (int)base_speed);
+                break;
+            case MENU_ITEM_KP:
+                sprintf(buf, "%s: %.2f", items[i], (double)line_kp);
+                break;
+            case MENU_ITEM_KD:
+                sprintf(buf, "%s: %.2f", items[i], (double)line_kd);
+                break;
+            case MENU_ITEM_KI:
+                sprintf(buf, "%s: %.3f", items[i], (double)line_ki);
+                break;
+            case MENU_ITEM_EXIT:
+                sprintf(buf, "%s", items[i]);
+                break;
+        }
+        OLED_ShowString(10, y, (uint8_t *)buf, 12);
+    }
+
+    OLED_Refresh();
+}
+
+// -----------------------------------------------------------
+// OLED 参数编辑 (MENU_EDIT)
+// -----------------------------------------------------------
+void OLED_show_edit(void)
+{
+    char buf[24];
+    const char *names[] = {"Base Speed", "KP", "KD", "KI"};
+    float val;
+
+    switch (edit_param) {
+        case 0: val = base_speed; break;
+        case 1: val = line_kp;    break;
+        case 2: val = line_kd;    break;
+        case 3: val = line_ki;    break;
+        default: val = 0; break;
+    }
+
+    OLED_Clear();
+    OLED_ShowString(0, 0, (uint8_t *)"-- EDIT --", 12);
+
+    sprintf(buf, "%s:", names[edit_param]);
+    OLED_ShowString(0, 16, (uint8_t *)buf, 16);
+
+    if (edit_param == 3)
+        sprintf(buf, "%.4f", (double)val);
+    else if (edit_param == 0)
+        sprintf(buf, "%d", (int)val);
+    else
+        sprintf(buf, "%.2f", (double)val);
+    OLED_ShowString(0, 34, (uint8_t *)buf, 24);
+
+    OLED_ShowString(0, 56, (uint8_t *)"UP/DN +- OK sav BK can", 12);
 
     OLED_Refresh();
 }
@@ -102,33 +189,31 @@ int main(void)
 {
     SYSCFG_DL_init();
 
-    // 初始化 OLED
     OLED_Init();
     OLED_ColorTurn(0);
     OLED_DisplayTurn(0);
     OLED_Clear();
-    OLED_ShowString(16, 20, (uint8_t *)"PID Car V2", 16);
-    OLED_ShowString(24, 40, (uint8_t *)"Init OK", 12);
+    OLED_ShowString(20, 20, (uint8_t *)"PID Car V3", 16);
+    OLED_ShowString(12, 40, (uint8_t *)"5BTN MENU OK", 12);
     OLED_Refresh();
-    delay_ms(1000);
+    delay_ms(1200);
 
-    // 使能中断（按键 + 编码器）
     NVIC_EnableIRQ(KEY_INT_IRQN);
     NVIC_EnableIRQ(DC_MOTOR_INT_IRQN);
 
-    // 初始化电机（内部启动 PID 定时器 ISR）
     motor_init(1);
     motor_init(2);
 
-    // 初始停车
     target_speed_1 = 0;
     target_speed_2 = 0;
 
     char debug_buf[120];
 
-    // ---- 主循环 ----
     while (1) {
-        // 模式变化时重置 PID
+        // ---- 处理按键事件（菜单状态机） ----
+        menu_process();
+
+        // ---- 模式变化时重置 PID ----
         if (mode != last_mode) {
             last_mode = mode;
             line_pid_reset();
@@ -138,21 +223,26 @@ int main(void)
             }
         }
 
-        // 根据模式控制电机方向
+        // ---- 根据模式控制电机 ----
         if (mode == MODE_RUN || mode >= MODE_TUNE_KP) {
-            motor_set_direction(1, 1);  // 正转
+            motor_set_direction(1, 1);
             motor_set_direction(2, 1);
         } else {
-            motor_set_direction(1, 0);  // 停止
+            motor_set_direction(1, 0);
             motor_set_direction(2, 0);
             target_speed_1 = 0;
             target_speed_2 = 0;
         }
 
-        // OLED 刷新
-        OLED_show_dashboard();
+        // ---- OLED 显示 ----
+        if (menu_state == MENU_EDIT)
+            OLED_show_edit();
+        else if (menu_state == MENU_MAIN)
+            OLED_show_menu();
+        else
+            OLED_show_dashboard();
 
-        // UART 调试输出（每秒5帧）
+        // ---- UART 调试 ----
         sprintf(debug_buf,
             "M%d|S:%d%d%d%d%d%d%d%d|P:%.0f E:%.0f T:%.0f|SpL:%d SpR:%d|Kp:%.3f Kd:%.3f Ki:%.4f BS:%.0f
 ",
