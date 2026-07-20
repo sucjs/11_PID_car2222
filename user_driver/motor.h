@@ -51,5 +51,11 @@
 void motor_init(uint8_t motor_id);
 void motor_set_duty(uint8_t motor_id, uint32_t duty);
 void motor_set_direction(uint8_t motor_id, uint8_t direction);
+void motor_pid_reset(void);
+
+extern uint32_t raw_enc_1;  // 编码器1原始计数值(调试)
+extern uint32_t raw_enc_2;  // 编码器2原始计数值(调试)
+extern int32_t  PWM_1_duty;
+extern int32_t  PWM_2_duty;
 
 #endif // MOTOR_H

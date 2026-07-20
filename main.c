@@ -36,6 +36,8 @@ extern float speed_1;
 extern float speed_2;
 extern uint8_t huidu_value[];
 extern float line_kp, line_kd, line_ki, base_speed;
+extern uint32_t raw_enc_1, raw_enc_2;
+extern int32_t PWM_1_duty, PWM_2_duty;
 extern float line_position, line_error, line_turn;
 
 // -----------------------------------------------------------
@@ -93,8 +95,8 @@ void OLED_show_dashboard(void)
     sprintf(buf, "L:%3d R:%3d T:%d", (int)speed_1, (int)speed_2, (int)line_turn);
     OLED_ShowString(0, 38, (uint8_t *)buf, 12);
 
-    sprintf(buf, "Kp%.2f Kd%.2f Ki%.3f",
-            (double)line_kp, (double)line_kd, (double)line_ki);
+    sprintf(buf, "E1:%d E2:%d D1:%d",
+            (int)raw_enc_1, (int)raw_enc_2, (int)PWM_1_duty);
     OLED_ShowString(0, 50, (uint8_t *)buf, 12);
 
     OLED_Refresh();
@@ -217,6 +219,7 @@ int main(void)
         if (mode != last_mode) {
             last_mode = mode;
             line_pid_reset();
+            motor_pid_reset();
             if (mode == MODE_STOP) {
                 target_speed_1 = 0;
                 target_speed_2 = 0;
@@ -244,7 +247,8 @@ int main(void)
 
         // ---- UART 调试 ----
         sprintf(debug_buf,
-            "M%d|S:%d%d%d%d%d%d%d%d|P:%.0f E:%.0f T:%.0f|SpL:%d SpR:%d|Kp:%.3f Kd:%.3f Ki:%.4f BS:%.0f
+            "M%d|S:%d%d%d%d%d%d%d%d|P:%.0f E:%.0f T:%.0f|SpL:%d SpR:%d|Kp:%.3f Kd:%.3f Ki:%.4f BS:%.0f
+
 ",
             mode,
             huidu_value[0], huidu_value[1], huidu_value[2], huidu_value[3],
