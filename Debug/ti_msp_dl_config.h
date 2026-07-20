@@ -187,7 +187,7 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define KEY_KEY_BACK_IOMUX                                      (IOMUX_PINCM28)
 /* KEY_RUN:  GPIOB.14 with pinCMx 31 on package pin 2 */
 #define KEY_KEY_RUN_IIDX                                    (DL_GPIO_IIDX_DIO14)
-#define KEY_KEY_RUN_PIN                                         (DL_GPIO_PIN_14)
+#define KEY_KEY_RUN_PIN                                         (DL_GPIO_PIN_27)
 #define KEY_KEY_RUN_IOMUX                                       (IOMUX_PINCM31)
 /* Defines for AIN2: GPIOB.19 with pinCMx 45 on package pin 16 */
 #define DC_MOTOR_AIN2_PORT                                               (GPIOB)
@@ -197,18 +197,18 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define DC_MOTOR_AIN1_PORT                                               (GPIOB)
 #define DC_MOTOR_AIN1_PIN                                       (DL_GPIO_PIN_17)
 #define DC_MOTOR_AIN1_IOMUX                                      (IOMUX_PINCM43)
-/* Defines for AA: GPIOA.25 with pinCMx 55 on package pin 26 */
+/* Defines for AA: GPIOA.26 with pinCMx 55 on package pin 26 */
 #define DC_MOTOR_AA_PORT                                                 (GPIOA)
 // pins affected by this interrupt request:["AA","BA"]
 #define DC_MOTOR_INT_IRQN                                       (GPIOA_INT_IRQn)
 #define DC_MOTOR_INT_IIDX                       (DL_INTERRUPT_GROUP1_IIDX_GPIOA)
-#define DC_MOTOR_AA_IIDX                                    (DL_GPIO_IIDX_DIO25)
-#define DC_MOTOR_AA_PIN                                         (DL_GPIO_PIN_25)
-#define DC_MOTOR_AA_IOMUX                                        (IOMUX_PINCM55)
-/* Defines for AB: GPIOA.14 with pinCMx 36 on package pin 7 */
+#define DC_MOTOR_AA_IIDX                                    (DL_GPIO_IIDX_DIO26)
+#define DC_MOTOR_AA_PIN                                         (DL_GPIO_PIN_26)
+#define DC_MOTOR_AA_IOMUX                                        (IOMUX_PINCM59)
+/* Defines for AB: GPIOA.27 with pinCMx 36 on package pin 7 */
 #define DC_MOTOR_AB_PORT                                                 (GPIOA)
-#define DC_MOTOR_AB_PIN                                         (DL_GPIO_PIN_14)
-#define DC_MOTOR_AB_IOMUX                                        (IOMUX_PINCM36)
+#define DC_MOTOR_AB_PIN                                         (DL_GPIO_PIN_27)
+#define DC_MOTOR_AB_IOMUX                                        (IOMUX_PINCM60)
 /* Defines for BIN2: GPIOB.24 with pinCMx 52 on package pin 23 */
 #define DC_MOTOR_BIN2_PORT                                               (GPIOB)
 #define DC_MOTOR_BIN2_PIN                                       (DL_GPIO_PIN_24)
@@ -217,15 +217,15 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define DC_MOTOR_BIN1_PORT                                               (GPIOA)
 #define DC_MOTOR_BIN1_PIN                                       (DL_GPIO_PIN_16)
 #define DC_MOTOR_BIN1_IOMUX                                      (IOMUX_PINCM38)
-/* Defines for BA: GPIOA.26 with pinCMx 59 on package pin 30 */
+/* Defines for BA: GPIOA.25 with pinCMx 59 on package pin 30 */
 #define DC_MOTOR_BA_PORT                                                 (GPIOA)
-#define DC_MOTOR_BA_IIDX                                    (DL_GPIO_IIDX_DIO26)
-#define DC_MOTOR_BA_PIN                                         (DL_GPIO_PIN_26)
-#define DC_MOTOR_BA_IOMUX                                        (IOMUX_PINCM59)
-/* Defines for BB: GPIOA.27 with pinCMx 60 on package pin 31 */
+#define DC_MOTOR_BA_IIDX                                    (DL_GPIO_IIDX_DIO25)
+#define DC_MOTOR_BA_PIN                                         (DL_GPIO_PIN_25)
+#define DC_MOTOR_BA_IOMUX                                        (IOMUX_PINCM55)
+/* Defines for BB: GPIOA.14 with pinCMx 60 on package pin 31 */
 #define DC_MOTOR_BB_PORT                                                 (GPIOA)
-#define DC_MOTOR_BB_PIN                                         (DL_GPIO_PIN_27)
-#define DC_MOTOR_BB_IOMUX                                        (IOMUX_PINCM60)
+#define DC_MOTOR_BB_PIN                                         (DL_GPIO_PIN_14)
+#define DC_MOTOR_BB_IOMUX                                        (IOMUX_PINCM36)
 /* Defines for S0: GPIOB.5 with pinCMx 18 on package pin 53 */
 #define HUIDU_S0_PORT                                                    (GPIOB)
 #define HUIDU_S0_PIN                                             (DL_GPIO_PIN_5)
